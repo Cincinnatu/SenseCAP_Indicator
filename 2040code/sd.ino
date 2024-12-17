@@ -7,8 +7,9 @@
 
 const float Vref = 3.3;
 int cnt = 0;
-
+int espiqr = 0;
 String SDDataString = "";
+int powerset = 0;
 
 void serialEvent() {
   while (Serial.available()) {
@@ -38,14 +39,28 @@ void serialEvent() {
 
 void serialEvent1() {
   while (Serial1.available()) {
-    char inChar = (char)Serial1.read();
-      Serial.println("esp32:");
+    int inChar = (int)Serial1.read();
+      Serial.println("esp32:"); 
       Serial.println(inChar);
-      digitalWrite(24, LOW);
+      if(espiqr == 1 && inChar == 3)
+      {
+        powerset = 1;
+        digitalWrite(24, LOW);
+        digitalWrite(23, LOW);
+        digitalWrite(21, LOW);
+      }
   }
 }
 
 void setup() {
+  pinMode(24, OUTPUT);
+  digitalWrite(24, HIGH);
+  pinMode(21, OUTPUT);
+  pinMode(23, OUTPUT);
+  digitalWrite(21, HIGH);
+  
+  pinMode(22, INPUT);
+  digitalWrite(21, HIGH);
   Serial.begin(115200);
   Serial1.setRX(17);
   Serial1.setTX(16);
@@ -61,36 +76,34 @@ void setup() {
   } else {
     Serial.println("card initialized.");
   }
-  pinMode(21, OUTPUT);
-  pinMode(23, OUTPUT);
-  pinMode(24, OUTPUT);
-  pinMode(22, INPUT);
-  digitalWrite(21, HIGH);
-  //digitalWrite(23, HIGH);
-  digitalWrite(24, HIGH);
-  delay(3000);
+
+  espiqr = 1;
 
 }
 
 void loop() {
   int state = digitalRead(22); // 读取引脚状态
-  if (state == LOW) {
-    Serial.println("Pin22 is LOW ");
-  } else {
-    Serial.println("Pin22 is HIGH ");
-  }
-
-   delay(1000);
+  //delay(1000);
   uint16_t adc0_data = analogRead(ADC0);
   float Voltage = adc0_data * (Vref / 1024);
   Serial.println(Voltage * 2);
   float adjustedVoltage = Voltage * 2; 
-  if(adjustedVoltage <= 3 && state == LOW)
+
+  if(adjustedVoltage <= 3 && adjustedVoltage > 1 )
   {
-    digitalWrite(24, LOW);
-    Serial.println("Pin 24 set to LOW");
+    adc0_data = analogRead(ADC0);
+    Voltage = adc0_data * (Vref / 1024);
+    Serial.println(Voltage * 2);
+    adjustedVoltage = Voltage * 2; 
+
+    if(adjustedVoltage <= 3 && adjustedVoltage > 1)
+    {
+      digitalWrite(24, LOW);
+      Serial.println("Pin 24 set to LOW");
+    }
 
   }
+
   delay(1000);
   SDDataString = "";
   Serial.printf("\r\n\r\n--------- start measure %d-------\r\n", cnt);
@@ -110,6 +123,19 @@ void loop() {
     Serial.println(SDDataString);
   } else {
     Serial.println("error opening datalog.txt");
+  }
+
+  if(powerset == 1)
+  {
+    digitalWrite(24, LOW);
+    digitalWrite(23, LOW);
+    digitalWrite(21, LOW);
+  }
+
+  if (state == LOW) {
+  Serial.println("Pin22 is LOW ");
+  } else {
+    Serial.println("Pin22 is HIGH ");
   }
 
 }

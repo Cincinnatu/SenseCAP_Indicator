@@ -6,7 +6,7 @@
 #include "indicator_storage_nvs.h"
 #include "indicator_storage_spiffs.h"
 #include "indicator_display.h"
-//#include "indicator_wifi.h"
+#include "indicator_wifi.h"
 #include "indicator_time.h"
 #include "esp32_rp2040.h"
 #include "indicator_sensor.h"

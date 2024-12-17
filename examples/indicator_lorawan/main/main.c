@@ -124,10 +124,17 @@ int audio_set = 0;
 extern TaskHandle_t lorawanTaskHandle;
 
 void app_main(void) {
+    int level = gpio_get_level(38);
+    if (level)
+    {
+        ESP_LOGI("TAG", "power on btn");
+        vTaskDelay(3000 / portTICK_PERIOD_MS);
+    }
+    
     int audio_hz = 16000;//采样率
     int audio_bit = 16;//音频位数
     
-    int audio_vol = 1;//音量-16~16
+    int audio_vol = -15;//音量-16~16
     ESP_LOGI("TAG", "system start");
     ESP_LOGI("", SENSECAP, VERSION, __DATE__, __TIME__);
 
